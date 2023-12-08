@@ -1,0 +1,39 @@
+version: '3'
+services:
+  react:
+    image: todo_react
+    build:
+      # context: ./client
+      dockerfile: ./todos_client/Dockerfile
+    env_file: /home/ubuntu/todo-app-pern/todos_client/.env
+    ports:
+      - 3000:3000
+    depends_on:
+      - postgres
+
+  node:
+    image: todo_node
+    build:
+      # context: ./server
+      dockerfile: ./todos_server/Dockerfile
+    env_file: /home/ubuntu/todo-app-pern/todos_server/.env
+    ports:
+      - 5000:5000
+    depends_on:
+      - postgres
+
+  postgres:
+    build:
+      # context: ./database
+      dockerfile: ./todos_database/Dockerfile
+    environment: 
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: Pp123456789
+      # POSTGRES_DB: clarustodo
+    ports:
+      - 5432:5432
+    volumes:
+      - psql-data:/var/lib/pgsql/data
+
+volumes:
+    psql-data:

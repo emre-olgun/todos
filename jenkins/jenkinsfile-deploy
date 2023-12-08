@@ -1,0 +1,75 @@
+pipeline {
+    agent any
+    environment {
+        APP_NAME="todo-app-pern"
+        APP_REPO_NAME="chart-repo/${APP_NAME}"
+        AWS_ACCOUNT_ID=sh(script:'aws sts get-caller-identity --query Account --output text', returnStdout:true).trim()
+        AWS_REGION="us-east-1"
+        ECR_REGISTRY="${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com"
+    }
+    stages {
+        stage('Create ECR Repo') {
+            steps {
+                echo "Creating ECR Repo for ${APP_NAME} app"
+                sh '''
+                aws ecr describe-repositories --region ${AWS_REGION} --repository-name ${APP_REPO_NAME} || \
+                         aws ecr create-repository \
+                         --repository-name ${APP_REPO_NAME} \
+                         --image-scanning-configuration scanOnPush=true \
+                         --image-tag-mutability MUTABLE \
+                         --region ${AWS_REGION}
+                '''
+            }
+        }
+
+        stage('Prepare Tags for Docker Images') {
+            steps {
+                echo 'Preparing Tags for Docker Images'
+                script {
+                    env.IMAGE_TAG_REACT="${ECR_REGISTRY}/${APP_REPO_NAME}:react-b${BUILD_NUMBER}"
+                    env.IMAGE_TAG_NODE="${ECR_REGISTRY}/${APP_REPO_NAME}:node-b${BUILD_NUMBER}"
+                    env.IMAGE_TAG_POSTGRES="${ECR_REGISTRY}/${APP_REPO_NAME}:postgres-b${BUILD_NUMBER}"
+                }
+            }
+        }
+        stage('Build App Docker Images') {
+            steps {
+                echo 'Building App Images'
+                sh ". ./jenkins/image-build.sh"
+                sh 'docker image ls'
+            }
+        }
+        stage('Push Images to ECR Repo') {
+            steps {
+                echo "Pushing ${APP_NAME} Images to ECR Repo"
+                sh ". ./jenkins/image-push.sh"
+            }
+        }
+        stage('Deploy App with HELM') {
+            steps {
+                echo "Deploying App on Kubernetes"
+                envsubst < k8s/todos_chart/values-template.yaml > k8s/todos_chart/values.yaml
+                sed -i s/HELM_VERSION/${BUILD_NUMBER}/ k8s/todos_chart/Chart.yaml
+                AWS_REGION=$AWS_REGION helm repo add stable-todos s3://emre-helm-charts/stable/todos/ || echo "repository name already exists"
+                AWS_REGION=$AWS_REGION helm repo update
+                helm package k8s/todos_chart
+                AWS_REGION=$AWS_REGION helm s3 push --force todos_chart-${BUILD_NUMBER}.tgz stable-todos
+                kubectl create ns todos || echo "namespace petclinic-qa already exists"
+                kubectl delete secret regcred -n todos || echo "there is no regcred secret in todos namespace"
+                kubectl create secret generic regcred -n todos \
+                    --from-file=.dockerconfigjson=/var/lib/jenkins/.docker/config.json \
+                    --type=kubernetes.io/dockerconfigjson
+AWS_REGION=$AWS_REGION helm repo update
+AWS_REGION=$AWS_REGION helm upgrade --install \
+    petclinic-app-release stable-petclinic/petclinic_chart --version ${BUILD_NUMBER} \
+    --namespace petclinic-qa
+            }
+        }
+        stage('K3s ') {
+            steps {
+  
+            }
+        }
+
+    }
+}

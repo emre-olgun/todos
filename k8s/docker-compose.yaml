@@ -1,0 +1,33 @@
+version: '3'
+services:
+  react:
+    image: "{{ .Values.IMAGE_TAG_REACT }}"
+    ports:
+      - 3000:3000
+    labels:
+      kompose.image-pull-secret: "regcred"
+      kompose.service.expose: "{{ .Values.DNS_NAME }}"
+      kompose.service.type: "nodeport"
+      kompose.service.nodeport.port: "30001"
+    depends_on:
+      - postgres
+
+  node:
+    image: "{{ .Values.IMAGE_TAG_NODE }}"
+    ports:
+      - 5000:5000
+    depends_on:
+      - postgres
+
+  postgres:
+    image: "{{ .Values.IMAGE_TAG_POSTGRES }}"
+    environment: 
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: Pp123456789
+    ports:
+      - 5432:5432
+    volumes:
+      - psql-data:/var/lib/pgsql/data
+
+volumes:
+    psql-data:
