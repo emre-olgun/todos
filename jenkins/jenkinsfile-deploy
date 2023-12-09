@@ -36,9 +36,11 @@ pipeline {
         stage('Build App Docker Images') {
             steps {
                 echo 'Building App Images'
+                script {
                     env.IMAGE_TAG_REACT="${ECR_REGISTRY}/${APP_REPO_NAME}:react-b${BUILD_NUMBER}"
                     env.IMAGE_TAG_NODE="${ECR_REGISTRY}/${APP_REPO_NAME}:node-b${BUILD_NUMBER}"
                     env.IMAGE_TAG_POSTGRES="${ECR_REGISTRY}/${APP_REPO_NAME}:postgres-b${BUILD_NUMBER}"
+                }
                 sh ". ./jenkins/image-build.sh"
                 sh "docker image ls"
             }
