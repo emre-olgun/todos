@@ -49,7 +49,7 @@ pipeline {
                 echo 'Building App Images'
                 sh "printenv IMAGE_TAG_REACT"
                 sh ". ./jenkins/image-build.sh"
-                sh 'docker image ls'
+                sh "docker image ls"
             }
         }
         stage('Push Images to ECR Repo') {
