@@ -36,7 +36,7 @@ pipeline {
                     env.IMAGE_TAG_NODE="${ECR_REGISTRY}/${APP_REPO_NAME}:node-b${BUILD_NUMBER}"
                     env.IMAGE_TAG_POSTGRES="${ECR_REGISTRY}/${APP_REPO_NAME}:postgres-b${BUILD_NUMBER}"
                 }
-                echo '${IMAGE_TAG_REACT}'
+                sh "echo ${IMAGE_TAG_REACT}"
             }
         }
         stage('Build App Docker Images') {
