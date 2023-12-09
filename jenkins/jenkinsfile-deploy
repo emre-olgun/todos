@@ -6,6 +6,9 @@ pipeline {
         AWS_ACCOUNT_ID=sh(script:'aws sts get-caller-identity --query Account --output text', returnStdout:true).trim()
         AWS_REGION="us-east-1"
         ECR_REGISTRY="${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com"
+        IMAGE_TAG_REACT="${ECR_REGISTRY}/${APP_REPO_NAME}:react-b${BUILD_NUMBER}"
+        IMAGE_TAG_NODE="${ECR_REGISTRY}/${APP_REPO_NAME}:node-b${BUILD_NUMBER}"
+        IMAGE_TAG_POSTGRES="${ECR_REGISTRY}/${APP_REPO_NAME}:postgres-b${BUILD_NUMBER}"
     }
     stages {
         stage('Create ECR Repo') {
@@ -22,16 +25,16 @@ pipeline {
             }
         }
 
-        stage('Prepare Tags for Docker Images') {
-            steps {
-                echo 'Preparing Tags for Docker Images'
-                script {
-                    env.IMAGE_TAG_REACT="${ECR_REGISTRY}/${APP_REPO_NAME}:react-b${BUILD_NUMBER}"
-                    env.IMAGE_TAG_NODE="${ECR_REGISTRY}/${APP_REPO_NAME}:node-b${BUILD_NUMBER}"
-                    env.IMAGE_TAG_POSTGRES="${ECR_REGISTRY}/${APP_REPO_NAME}:postgres-b${BUILD_NUMBER}"
-                }
-            }
-        }
+        // stage('Prepare Tags for Docker Images') {
+        //     steps {
+        //         echo 'Preparing Tags for Docker Images'
+        //         script {
+        //             env.IMAGE_TAG_REACT="${ECR_REGISTRY}/${APP_REPO_NAME}:react-b${BUILD_NUMBER}"
+        //             env.IMAGE_TAG_NODE="${ECR_REGISTRY}/${APP_REPO_NAME}:node-b${BUILD_NUMBER}"
+        //             env.IMAGE_TAG_POSTGRES="${ECR_REGISTRY}/${APP_REPO_NAME}:postgres-b${BUILD_NUMBER}"
+        //         }
+        //     }
+        // }
         stage('Build App Docker Images') {
             steps {
                 echo 'Building App Images'
