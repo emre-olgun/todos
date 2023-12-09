@@ -14,9 +14,7 @@ pipeline {
         stage('Image tag Control') {
             steps {
                 echo "Control"
-                sh "printenv IMAGE_TAG_REACT"
-                sh "printenv IMAGE_TAG_NODE"
-                sh "printenv IMAGE_TAG_POSTGRES"
+                sh "printenv WORKSPACE"
             }
         }
         stage('Create ECR Repo') {
