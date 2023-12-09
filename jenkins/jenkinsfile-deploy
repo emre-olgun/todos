@@ -11,6 +11,14 @@ pipeline {
         IMAGE_TAG_POSTGRES="${ECR_REGISTRY}/${APP_REPO_NAME}:postgres-b${BUILD_NUMBER}"
     }
     stages {
+        stage('Image tag Control') {
+            steps {
+                echo "Control"
+                sh "printenv IMAGE_TAG_REACT"
+                sh "printenv IMAGE_TAG_NODE"
+                sh "printenv IMAGE_TAG_POSTGRES"
+            }
+        }
         stage('Create ECR Repo') {
             steps {
                 echo "Creating ECR Repo for ${APP_NAME} app"
