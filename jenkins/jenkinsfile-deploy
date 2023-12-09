@@ -21,6 +21,12 @@ pipeline {
                 '''
             }
         }
+        stage('Deneme') {
+            steps {
+                echo "Deneme"
+                sh "docker --version"
+            }
+        }
 
         // stage('Prepare Tags for Docker Images') {
         //     steps {
