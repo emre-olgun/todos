@@ -30,6 +30,7 @@ pipeline {
                          --image-tag-mutability MUTABLE \
                          --region ${AWS_REGION}
                 '''
+                sh "printenv IMAGE_TAG_REACT"
             }
         }
 
