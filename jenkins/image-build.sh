@@ -1,3 +1,3 @@
-docker build --force-rm -t "$(IMAGE_TAG_REACT)" "${WORKSPACE}/k8s/client"
-docker build --force-rm -t "$(IMAGE_TAG_NODE)" "${WORKSPACE}/k8s/server"
-docker build --force-rm -t "$(IMAGE_TAG_POSTGRES)" "${WORKSPACE}/k8s/database"
+docker build --force-rm -t "$(IMAGE_TAG_REACT)" "${WORKSPACE}/todos_client"
+docker build --force-rm -t "$(IMAGE_TAG_NODE)" "${WORKSPACE}/todos_server"
+docker build --force-rm -t "$(IMAGE_TAG_POSTGRES)" "${WORKSPACE}/todos_database"
